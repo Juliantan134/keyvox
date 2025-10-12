@@ -17,7 +17,7 @@ def show_home_screen(app, event=None):
         app.login_attempt_user = {"username": app.just_enrolled_username}
         app.show_login_voice_auth_screen()
         return
-        
+    else:
         show_insert_key_screen(app)
 
 def show_insert_key_screen(app):
@@ -25,7 +25,6 @@ def show_insert_key_screen(app):
     app.login_flow_state = 'not_started'
     app.currently_logged_in_user = None
     app.login_attempt_user = None
-
     LIGHT_CARD_BG = "#AD567C" 
 
     card = ui_helpers.create_main_card(app, width=450, height=350)

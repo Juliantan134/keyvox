@@ -184,7 +184,7 @@ class KeyVoxApp:
             self.canvas.create_window(self.width / 2, self.height / 2 + 60, window=self.content_frame, anchor="center")
             
             print("➡️ Normal mode: Showing welcome screen.")
-            self.show_welcome_screen()
+            self.show_insert_key_screen()
         
     def _on_authentication_success(self):
         """
@@ -306,50 +306,50 @@ class KeyVoxApp:
             # Always go to the initial welcome screen on logout
             self.show_insert_key_screen() 
 
-    # =========================================================
-    # WELCOME SCREEN
-    # =========================================================
-    def show_welcome_screen(self):
-        """Landing page before login screen."""
-        self.login_flow_state = 'not_started'
-        self.currently_logged_in_user = None
-        self.login_attempt_user = None
+    # # =========================================================
+    # # WELCOME SCREEN
+    # # =========================================================
+    # def show_welcome_screen(self):
+    #     """Landing page before login screen."""
+    #     self.login_flow_state = 'not_started'
+    #     self.currently_logged_in_user = None
+    #     self.login_attempt_user = None
 
-        LIGHT_CARD_BG = "#AD567C"
-        card = ui_helpers.create_main_card(self, width=480, height=380)
-        card.config(bg=LIGHT_CARD_BG, bd=0, highlightthickness=0)
+    #     LIGHT_CARD_BG = "#AD567C"
+    #     card = ui_helpers.create_main_card(self, width=480, height=380)
+    #     card.config(bg=LIGHT_CARD_BG, bd=0, highlightthickness=0)
 
-        wrapper = tk.Frame(card, bg=LIGHT_CARD_BG, bd=0)
-        wrapper.pack(expand=True)
+    #     wrapper = tk.Frame(card, bg=LIGHT_CARD_BG, bd=0)
+    #     wrapper.pack(expand=True)
 
-        tk.Label(wrapper, image=self.lock_img, bg=LIGHT_CARD_BG).pack(pady=(15, 10))
-        tk.Label(wrapper, text="Insert Your Key", font=self.font_large, fg=config.TEXT_COLOR, bg=LIGHT_CARD_BG).pack(pady=(0, 8))
-        tk.Label(wrapper,
-                 font=self.font_normal, fg="#E8E8E8", bg=LIGHT_CARD_BG,
-                 wraplength=350, justify="center").pack(pady=(0, 18))
+    #     tk.Label(wrapper, image=self.lock_img, bg=LIGHT_CARD_BG).pack(pady=(15, 10))
+    #     tk.Label(wrapper, text="Insert Your Key", font=self.font_large, fg=config.TEXT_COLOR, bg=LIGHT_CARD_BG).pack(pady=(0, 8))
+    #     tk.Label(wrapper,
+    #              font=self.font_normal, fg="#E8E8E8", bg=LIGHT_CARD_BG,
+    #              wraplength=350, justify="center").pack(pady=(0, 18))
 
-        # Rounded button
-        def create_rounded_button(parent, text, command=None, radius=15, width=200, height=40,
-                                  bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR):
-            wrap = tk.Frame(parent, bg=LIGHT_CARD_BG)
-            wrap.pack(pady=(0, 18))
-            canvas = tk.Canvas(wrap, width=width, height=height, bg=LIGHT_CARD_BG, bd=0, highlightthickness=0)
-            canvas.pack()
-            x1, y1, x2, y2 = 2, 2, width-2, height-2
-            canvas.create_oval(x1, y1, x1+radius*2, y1+radius*2, fill=bg, outline=bg)
-            canvas.create_oval(x2-radius*2, y1, x2, y1+radius*2, fill=bg, outline=bg)
-            canvas.create_oval(x1, y2-radius*2, x1+radius*2, y2, fill=bg, outline=bg)
-            canvas.create_oval(x2-radius*2, y2-radius*2, x2, y2, fill=bg, outline=bg)
-            canvas.create_rectangle(x1+radius, y1, x2-radius, y2, fill=bg, outline=bg)
-            canvas.create_rectangle(x1, y1+radius, x2, y2-radius, fill=bg, outline=bg)
-            text_obj = canvas.create_text(width//2, height//2, text=text, fill=fg, font=self.font_normal)
-            canvas.tag_bind(text_obj, "<Button-1>", lambda e: command())
-            return wrap
+    #     # Rounded button
+    #     def create_rounded_button(parent, text, command=None, radius=15, width=200, height=40,
+    #                               bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR):
+    #         wrap = tk.Frame(parent, bg=LIGHT_CARD_BG)
+    #         wrap.pack(pady=(0, 18))
+    #         canvas = tk.Canvas(wrap, width=width, height=height, bg=LIGHT_CARD_BG, bd=0, highlightthickness=0)
+    #         canvas.pack()
+    #         x1, y1, x2, y2 = 2, 2, width-2, height-2
+    #         canvas.create_oval(x1, y1, x1+radius*2, y1+radius*2, fill=bg, outline=bg)
+    #         canvas.create_oval(x2-radius*2, y1, x2, y1+radius*2, fill=bg, outline=bg)
+    #         canvas.create_oval(x1, y2-radius*2, x1+radius*2, y2, fill=bg, outline=bg)
+    #         canvas.create_oval(x2-radius*2, y2-radius*2, x2, y2, fill=bg, outline=bg)
+    #         canvas.create_rectangle(x1+radius, y1, x2-radius, y2, fill=bg, outline=bg)
+    #         canvas.create_rectangle(x1, y1+radius, x2, y2-radius, fill=bg, outline=bg)
+    #         text_obj = canvas.create_text(width//2, height//2, text=text, fill=fg, font=self.font_normal)
+    #         canvas.tag_bind(text_obj, "<Button-1>", lambda e: command())
+    #         return wrap
 
-        create_rounded_button(wrapper, "Get Started", command=self.show_insert_key_screen)
+    #     create_rounded_button(wrapper, "Get Started", command=self.show_insert_key_screen)
 
-        tk.Label(wrapper, text="© 2025 KeyVox Technologies",
-                 font=self.font_small, fg="#D9D9D9", bg=LIGHT_CARD_BG).pack(pady=(10, 0))
+    #     tk.Label(wrapper, text="© 2025 KeyVox Technologies",
+    #              font=self.font_small, fg="#D9D9D9", bg=LIGHT_CARD_BG).pack(pady=(10, 0))
 
 
 if __name__ == "__main__":
