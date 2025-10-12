@@ -3,6 +3,10 @@ from tkinter import font, messagebox
 import os
 import pyaudio
 from PIL import Image, ImageTk
+import sys
+from file_protector import decrypt_and_open_file
+import serial.tools.list_ports # <-- Add or verify this import
+
 
 # Local module imports
 from api_client import APIClient
@@ -17,11 +21,28 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../b
 from user_profile import load_session, save_session, clear_session
 
 class KeyVoxApp:
-    def __init__(self, root):
+    def __init__(self, root, args):
         self.temp_new_email = None # JC Temporary email variable for OTP Change
         self.root = root
         self.api = APIClient()
         
+        self.PICO_HWID = 'VID:PID=2E8A:0005' # The ID for a running Pico serial port
+        self.authenticated_pico_port = None # To store the COM port after login
+
+                 # State for file unlocking
+        self.unlock_mode = False
+        self.target_file_to_unlock = None
+        self.temp_file_path = None # To track the decrypted file
+
+        # Check if a file path was passed as a command-line argument
+        if len(args) > 1: 
+            file_path = args[1]
+            if os.path.exists(file_path) and file_path.endswith(".locked"):
+                self.unlock_mode = True
+                self.target_file_to_unlock = file_path
+                print(f"✅ Unlock mode activated for: {self.target_file_to_unlock}")
+        # ----------------------------
+
         # --- Window and App Configuration ---
         self.width, self.height = 900, 600
         self.root.title("Key Vox")
@@ -52,6 +73,8 @@ class KeyVoxApp:
         self.enrollment_state = 'not_started'
         self.nav_widgets = {}
 
+        self.authenticated_pico_port = None # To store the COM port of the logged-in Pico
+        
         # --- Initialize PyAudio ---
         self.pyaudio_instance = pyaudio.PyAudio()
 
@@ -60,14 +83,14 @@ class KeyVoxApp:
         # --- Build Core UI ---
         self.canvas = tk.Canvas(root, width=self.width, height=self.height, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        ui_helpers.set_background_image(self)
-        ui_helpers.create_header(self)
+      #  ui_helpers.set_background_image(self)
+       # ui_helpers.create_header(self)
+        self.content_frame = tk.Canvas(self.canvas, highlightthickness=0)
+        # self.content_frame = tk.Canvas(self.canvas, highlightthickness=0, bg=self.canvas.cget('bg'))
+        # self.canvas.create_window(self.width / 2, self.height / 2 + 60, window=self.content_frame, anchor="center")
         
-        self.content_frame = tk.Canvas(self.canvas, highlightthickness=0, bg=self.canvas.cget('bg'))
-        self.canvas.create_window(self.width / 2, self.height / 2 + 60, window=self.content_frame, anchor="center")
-        
-        self.check_server_and_start()
         self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
+        self.check_server_and_start()
 
     # =========================================================
     # IMAGE LOADING
@@ -131,13 +154,92 @@ class KeyVoxApp:
     # SERVER CHECK AND STARTUP FLOW
     # =========================================================
     def check_server_and_start(self):
-        """Checks backend server status and starts the UI flow."""
+        """Checks backend server status and decides which UI flow to start."""
         if not self.api.check_server_status():
             messagebox.showerror("Connection Error", "Could not connect to the backend server.\nPlease ensure the server is running.")
             self.root.destroy()
+            return  # This 'return' is now correctly inside the 'if' block.
+
+        print("✅ Backend server connected.")
+
+        # --- This routing logic is now correctly inside the function ---
+        if self.unlock_mode:
+            # --- UNLOCK FILE FLOW ---
+            ui_helpers.set_background_image(self)
+            ui_helpers.create_header(self, show_nav=True)
+
+            self.content_frame.config(bg=self.canvas.cget('bg'))
+            self.canvas.create_window(self.width / 2, self.height / 2 + 60, window=self.content_frame, anchor="center")
+
+            self.login_attempt_user = {"username": "secure_file_access"}
+
+            print("➡️ Unlock mode: Proceeding to voice authentication.")
+            self.show_login_voice_auth_screen()
         else:
-            print("✅ Backend server connected.")
-            self.show_insert_key_screen()
+            # --- NORMAL APP STARTUP FLOW ---
+            ui_helpers.set_background_image(self)
+            ui_helpers.create_header(self, show_nav=True)
+
+            self.content_frame.config(bg=self.canvas.cget('bg'))
+            self.canvas.create_window(self.width / 2, self.height / 2 + 60, window=self.content_frame, anchor="center")
+            
+            print("➡️ Normal mode: Showing welcome screen.")
+            self.show_welcome_screen()
+        
+    def _on_authentication_success(self):
+        """
+        This is the central handler for what to do after all authentication passes.
+        It checks if we are in 'unlock_mode' and acts accordingly.
+        """
+        print("❤️ Starting Pico heartbeat check...")
+        self.root.after(2000, self._check_pico_heartbeat)
+
+        if self.unlock_mode:
+            # --- FILE UNLOCK PATH ---
+            print(f"🔓 Authentication successful! Decrypting and opening {self.target_file_to_unlock}")
+            messagebox.showinfo("Access Granted", "Authentication successful. Opening secure file.")
+            
+            # Decrypt, open, and store the temp file path for later cleanup
+            self.temp_file_path = decrypt_and_open_file(self.target_file_to_unlock)
+            
+            if self.temp_file_path is None:
+                messagebox.showerror("Error", "Failed to decrypt or open the file. The key might be incorrect or the file corrupted.")
+            
+            # Gracefully shut down the authenticator app
+            self.root.after(500, self._on_closing)
+        else:
+            # --- ORIGINAL SECURE FOLDER PATH ---
+            print(f"🔓 Access Granted! Opening secure folder: {self.TARGET_PATH}")
+            messagebox.showinfo("Access Granted", "Authentication successful. Opening secure folder.")
+            try:
+                os.startfile(self.TARGET_PATH)
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not open the target folder: {e}")
+            self.root.after(500, self._shutdown)
+
+    def _check_pico_heartbeat(self):
+        """
+        Periodically checks if the authenticated Pico is still connected.
+        If the Pico is removed, this function closes the application.
+        """
+        # 1. Do nothing if no Pico was ever authenticated.
+        if not self.authenticated_pico_port:
+            return
+
+        # 2. Get a list of all currently connected serial port devices.
+        ports = serial.tools.list_ports.comports()
+        current_devices = [p.device for p in ports]
+
+        # 3. Check if our authenticated port is still in the list of connected devices.
+        if self.authenticated_pico_port not in current_devices:
+            # If it's MISSING, the Pico was unplugged!
+            print("🔴 Pico disconnected! Closing application for security.")
+            messagebox.showwarning("Security Alert", "Hardware token was removed. The application will now close.")
+            self._on_closing() # Use your existing closing function to ensure cleanup
+        else:
+            # If it's STILL CONNECTED, schedule this check to run again in 2 seconds.
+            self.root.after(2000, self._check_pico_heartbeat)
+
 
     # =========================================================
     # SCREEN NAVIGATION
@@ -176,6 +278,11 @@ class KeyVoxApp:
     def _mask_email(self, email): return helpers.mask_email(email)
 
     def _on_closing(self):
+        if self.temp_file_path and os.path.exists(self.temp_file_path):
+            print(f"🧹 Cleaning up temporary file: {self.temp_file_path}")
+            os.remove(self.temp_file_path)
+            self.temp_file_path = None # Clear the path
+
         self.is_recording = False
         if self.recording_thread and self.recording_thread.is_alive():
             self.root.after(100, self._shutdown)
@@ -247,7 +354,7 @@ class KeyVoxApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = KeyVoxApp(root)
+    app = KeyVoxApp(root, sys.argv)
     root.mainloop()
 
 

@@ -198,6 +198,19 @@ def handle_login_voice_record(app, event=None):
     # Simulate verification bypass
     app.recording_status_label.config(text="Verifying...")
     app.root.update_idletasks()
+
+    response = app.api.verify_voice(username, filepath) # Use your actual voice verify method
+
+    if response and response.get("status") == "success":
+        # If the voice is correct, proceed to the password screen
+        messagebox.showinfo("Voice Verified", "Voice authentication successful. Please enter your password.")
+        show_password_screen(app)
+    else:
+        # If the voice fails, show an error and stay on this screen
+        error_message = response.get("message", "Voice not recognized. Please try again.")
+        messagebox.showerror("Authentication Failed", error_message)
+        app.recording_status_label.config(text="Click the mic to try again")
+
     
     # --- Always accept ---
     messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
@@ -758,10 +771,12 @@ def check_password(app):
     
     if response.get("login_success") and response.get("user_details"):
         # On success, set the state and go DIRECTLY to the logged-in screen
-        app.currently_logged_in_user = response.get("user_details")
-        app.login_attempt_user = None
-        home_screens.show_logged_in_screen(app) # <-- Direct navigation
+        # app.currently_logged_in_user = response.get("user_details")
+        # app.login_attempt_user = None
+        # home_screens.show_logged_in_screen(app) # <-- Direct navigation
+        app._on_authentication_success()
     else:
-        # On failure, show an error
+        # If the password fails, show an error on the password screen
         app.error_label.config(text=response.get("message", "Incorrect Password."))
         app.password_entry.delete(0, 'end')
+
