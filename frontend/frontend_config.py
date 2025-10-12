@@ -25,6 +25,7 @@ TRANSITION = "all 0.2s cubic-bezier(0.4,0,0.2,1)"
 
 # --- Frontend Configuration ---
 AUDIO_DIR = "temp_audio"
+LOGIN_AUDIO_PATH = "temp_audio/login_attempt.wav"
 CHUNK = 1024
 CHANNELS = 1
 RATE = 44100

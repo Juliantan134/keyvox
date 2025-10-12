@@ -5,7 +5,7 @@ def set_background_image(app):
     """Sets the background image on the main canvas."""
     app.canvas.create_image(0, 0, anchor="nw", image=app.bg_img)
 
-def create_header(app):
+def create_header(app, show_nav=True):
     """Creates the top header with logo, navigation, and status icons."""
     nav_y_center, line_y, side_padding = 50, 70, 40
     app.canvas.create_image(side_padding, line_y / 1.2, anchor="w", image=app.logo_img, tags="logo")
@@ -29,8 +29,9 @@ def create_header(app):
     app.canvas.tag_bind(help_tag, "<Leave>", lambda e: app.canvas.config(cursor=""))
 
     # Dynamic Navigation Tabs
-    start_x = 180
-    is_enrolled = getattr(app, "user_data", {}).get("enrolled", False)
+    if show_nav:
+        start_x = 180
+        is_enrolled = getattr(app, "user_data", {}).get("enrolled", False)
 
     nav_map = {
         "home": app.show_home_screen,
