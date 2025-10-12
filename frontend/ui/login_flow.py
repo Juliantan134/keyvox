@@ -213,8 +213,8 @@ def handle_login_voice_record(app, event=None):
 
     
     # --- Always accept ---
-    messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
-    show_password_screen(app)
+    # messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
+    # show_password_screen(app)
 
 def show_password_screen(app):
     """Shows the final password entry screen with a visibility toggle."""
@@ -717,7 +717,7 @@ def show_new_password_screen(app):
     tk.Button(
         bf, text="Back", font=font_button,
         bg="#F5F5F5", fg="black", relief="flat", padx=12, pady=4,
-        command=lambda: app.show_applications_screen()
+        command=lambda: app.show_home_screen()
     ).pack(side="left")
 
     # Save Changes button → straight to OTP
