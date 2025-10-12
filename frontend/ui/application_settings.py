@@ -287,7 +287,7 @@ def show_voice_enrollment_screen(app):
     import tkinter.font as tkFont
     import random
     from tkinter import messagebox
-    from .other_screens import show_applications_screen  # make sure this import path is correct
+    from .other_screens import show_applications_screen 
 
     font_title = tkFont.Font(family="Poppins", size=12, weight="bold")
     font_text = tkFont.Font(family="Poppins", size=10)
@@ -460,6 +460,21 @@ def show_change_otp_settings_verification_screen(app):
 
     # --- Title ---
     tk.Label(card, text="OTP Verification", font=font_title, fg="white", bg=LIGHT_CARD_BG).pack(pady=(20, 10))
+
+    # --- Back Button (arrow only) ---
+    back_button = tk.Button(
+        card,
+        text="←",                # just an arrow
+        font=("Arial", 16, "bold"),
+        bg=LIGHT_CARD_BG,
+        fg="white",
+        bd=0,                   # no border
+        activebackground=LIGHT_CARD_BG,
+        activeforeground="white",
+        cursor="hand2",
+        command=lambda: show_change_otp_settings_screen(app)  # <- replace this with your back function
+    )
+    back_button.place(x=10, y=10) 
 
     # --- Info Text ---
     # email = app.currently_logged_in_user.get('email', 'your_email@example.com') if app.currently_logged_in_user else 'your_email@example.com' # JC Change comment whole line
