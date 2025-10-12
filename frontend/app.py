@@ -197,7 +197,7 @@ class KeyVoxApp:
             self.login_attempt_user = None
             self.login_flow_state = 'not_started'
             # Always go to the initial welcome screen on logout
-            self.show_welcome_screen() 
+            self.show_insert_key_screen() 
 
     # =========================================================
     # WELCOME SCREEN
