@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../backend")))
 from OTP.send_otp import send_otp, verify_otp
-from user_data_manager import update_email
+from user_data_manager import get_user_by_key, update_email, get_user_by_email, get_user_by_username, change_password, get_user_key_by_email_or_name
 
 def load_images(app):
     """Load and resize all images used in the UI."""
@@ -129,19 +129,63 @@ def show_change_password_screen(app):
     ).pack(side="left")
 
     # Save Changes button → straight to OTP
+    from utils.validators import validate_password
+
     def dummy_save_password():
+        user = app.currently_logged_in_user
+        print("dummy_save_password ",user)
+        """Dummy password update with full validation (no backend write)."""
         data = {key: entry.get() for key, entry in app.entry_widgets.items()}
 
-        # Basic validation
+        # --- Required fields check ---
         if not all(data.values()):
             app.enroll_error_label.config(text="All fields are required.")
             return
+
+        # --- Password strength validation ---
+        password_valid, password_err = validate_password(data.get("new_password", ""))
+        if not password_valid:
+            app.enroll_error_label.config(text=password_err)
+            return
+
+        # --- Confirm match ---
         if data["new_password"] != data["confirm_password"]:
             app.enroll_error_label.config(text="New passwords do not match.")
             return
 
-        messagebox.showinfo("Success", "Password updated (dummy). Proceeding to OTP...")
-        app.show_applications_screen()
+        # --- Prevent reusing old password ---
+        if data["current_password"] == data["new_password"]:
+            app.enroll_error_label.config(text="New password cannot be the same as the current one.")
+            return
+
+        # --- All checks passed ---
+        app.enroll_error_label.config(text="")
+        messagebox.showinfo(
+            "Success",
+            "✅ Password meets all criteria and matches confirmation.\n\n"
+            "Saving to database..."
+        )
+
+        # Proceed to next screen (dummy for now)
+        # --- Save new password via user_data_manager ---
+        try:
+            email = user.get("email", "").strip()
+            full_name = user.get("full_name", "").strip()
+
+            user_key = get_user_key_by_email_or_name(email=email, full_name=full_name)
+            if not user_key:
+                app.enroll_error_label.config(text="Error: User record not found in database.")
+                return
+
+            # --- Save new password via user_data_manager ---
+            change_password(user_key, data["new_password"])
+            messagebox.showinfo("Success", f"Password updated successfully for {full_name}!")
+            app.enroll_error_label.config(text="")
+            app.show_home_screen()  # Redirect to home/login
+        except Exception as e:
+            app.enroll_error_label.config(text=f"Error updating password: {e}")
+
+
 
     tk.Button(
         bf, text="Save Changes", font=font_button,

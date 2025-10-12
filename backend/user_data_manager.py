@@ -93,3 +93,25 @@ def change_password(user_key: str, new_password: str, user_file=USER_FILE):
         json.dump(users, f, indent=4)
 
     print(f"Password for user '{user_key}' updated successfully.")
+
+def get_user_key_by_email_or_name(email: str = "", full_name: str = "", user_file=USER_FILE):
+    users = load_users(user_file)
+    email = email.strip().lower()
+    full_name = full_name.strip().lower()
+
+    for key, user in users.items():
+        user_email = user.get("email", "").lower()
+        user_name = user.get("full_name", "").lower()
+
+        # If both provided, require both to match
+        if email and full_name:
+            if user_email == email and user_name == full_name:
+                return key
+        # If only one provided, match on that
+        elif email and user_email == email:
+            return key
+        elif full_name and user_name == full_name:
+            return key
+
+    return None
+
