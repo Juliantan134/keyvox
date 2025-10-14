@@ -7,7 +7,7 @@ BUTTON_COLOR = "#c8356e"
 BUTTON_LIGHT_COLOR = "#f0f0f0"
 BUTTON_LIGHT_TEXT_COLOR = "#333333"
 ERROR_COLOR = "#ff6b6b"
-SUCCESS_COLOR = "#7aff6e"
+SUCCESS_COLOR = "#4BB543"
 FONT_FAMILY = "Poppins, sans-serif"
 PLACEHOLDER_COLOR = "#333333"
 
@@ -25,6 +25,7 @@ TRANSITION = "all 0.2s cubic-bezier(0.4,0,0.2,1)"
 
 # --- Frontend Configuration ---
 AUDIO_DIR = "temp_audio"
+LOGIN_AUDIO_PATH = "temp_audio/login_attempt.wav"
 CHUNK = 1024
 CHANNELS = 1
 RATE = 44100

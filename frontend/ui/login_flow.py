@@ -199,6 +199,19 @@ def handle_login_voice_record(app, event=None):
     # Simulate verification bypass
     app.recording_status_label.config(text="Verifying...")
     app.root.update_idletasks()
+
+    response = app.api.verify_voice(username, filepath) # Use your actual voice verify method
+
+    if response and response.get("status") == "success":
+        # If the voice is correct, proceed to the password screen
+        messagebox.showinfo("Voice Verified", "Voice authentication successful. Please enter your password.")
+        show_password_screen(app)
+    else:
+        # If the voice fails, show an error and stay on this screen
+        error_message = response.get("message", "Voice not recognized. Please try again.")
+        messagebox.showerror("Authentication Failed", error_message)
+        app.recording_status_label.config(text="Click the mic to try again")
+
     
     # --- Always accept ---
     messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
@@ -213,6 +226,8 @@ def handle_login_voice_record(app, event=None):
         messagebox.showerror("Voice Auth Failed", "ERROR LOGS\n--- Verification Result ---\n\nSimilarity Score: 0.116\n ❌ Access Denied. Voice does not match.")
     
     
+    # messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
+    # show_password_screen(app)
 
 def show_password_screen(app):
     """Shows the final password entry screen with a visibility toggle."""
@@ -407,7 +422,7 @@ def show_email_verification_screen_forgot_password(app):
     error_label = tk.Label(card, text="", font=font_small, fg="red", bg=LIGHT_CARD_BG)
     error_label.pack(pady=(0, 10))
 
-    # --- Success Label ---
+   # --- Success Label ---
     success_label = tk.Label(card, text="", font=font_small, fg="green", bg=LIGHT_CARD_BG)
     success_label.pack(pady=(0, 10))
 
@@ -715,7 +730,7 @@ def show_new_password_screen(app):
     tk.Button(
         bf, text="Back", font=font_button,
         bg="#F5F5F5", fg="black", relief="flat", padx=12, pady=4,
-        command=lambda: app.show_applications_screen()
+        command=lambda: app.show_home_screen()
     ).pack(side="left")
 
     # Save Changes button → straight to OTP
@@ -769,10 +784,12 @@ def check_password(app):
     
     if response.get("login_success") and response.get("user_details"):
         # On success, set the state and go DIRECTLY to the logged-in screen
-        app.currently_logged_in_user = response.get("user_details")
-        app.login_attempt_user = None
-        home_screens.show_logged_in_screen(app) # <-- Direct navigation
+        # app.currently_logged_in_user = response.get("user_details")
+        # app.login_attempt_user = None
+        # home_screens.show_logged_in_screen(app) # <-- Direct navigation
+        app._on_authentication_success()
     else:
-        # On failure, show an error
+        # If the password fails, show an error on the password screen
         app.error_label.config(text=response.get("message", "Incorrect Password."))
         app.password_entry.delete(0, 'end')
+

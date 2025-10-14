@@ -3,83 +3,78 @@ import tensorflow as tf
 import numpy as np
 import librosa
 
-# --- Configuration (MUST MATCH YOUR TRAINING NOTEBOOK) ---
+# --- Configuration ---
 SAMPLE_RATE = 16000
-N_MFCC = 13
-MAX_LEN = 200 # You used 200 in your final training run
+N_MELS = 117
+MAX_LEN_FRAMES = 297
+N_FFT = 2048
+HOP_LENGTH = 512
 
-# --- Load the Model and Create the Embedding Extractor ---
-# This section runs only ONCE when the server starts. It's highly efficient.
-print("--- Loading custom trained LSTM model ---")
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "models", "lstm_voice_model.h5")
+# =====================================================================
+# --- LAZY LOADING SETUP ---
+# =====================================================================
 
-# 1. Load the full model that you trained
-main_model = tf.keras.models.load_model(MODEL_PATH)
+# ✅ FIX: Start with the model as None. It will be loaded on the first request.
+embedding_model = None
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "lstm_model_final.h5") 
 
-# 2. The "voiceprint" or "embedding" is the output of the second-to-last layer.
-#    We create a new, specialized model that stops at this layer to extract the features.
-embedding_model = tf.keras.Model(
-    inputs=main_model.inputs,
-    outputs=main_model.layers[4].output # This is the output of the Dense(64) layer
-)
-print("✅ Custom model and embedding extractor created successfully.")
-
+def load_model_on_demand():
+    """
+    This function loads the model if it hasn't been loaded yet.
+    It will only run once.
+    """
+    global embedding_model
+    if embedding_model is None:
+        print("--- First request received. Loading self-contained model for the first time... ---")
+        try:
+            # The heavy loading operation now happens here
+            embedding_model = tf.keras.models.load_model(MODEL_PATH, safe_mode=False)
+            
+            # "Warm up" the model to make subsequent predictions fast
+            print("--- Warming up the model... ---")
+            dummy_input = np.zeros((1, MAX_LEN_FRAMES, N_MELS), dtype=np.float32)
+            embedding_model.predict(dummy_input, verbose=0)
+            
+            print("✅ Custom model is loaded, warmed up, and ready.")
+        except Exception as e:
+            print(f"❌ FAILED TO LOAD MODEL: {e}")
+            # Re-raise to ensure the server logs the error
+            raise e
+            
+# =====================================================================
+# --- Main Embedding Function ---
+# =====================================================================
 
 def get_voice_embedding(audio_filepath):
     """
-    Takes the path to an audio file, processes it exactly like the training data,
-    and returns a 64-dimension numerical voiceprint (embedding).
+    Takes an audio file, processes it, and returns a 256-dimension voiceprint.
     """
+    # ✅ FIX: Call the lazy loader at the beginning of the function
+    load_model_on_demand()
+    
     try:
-        # 1. Load and Standardize Audio
         audio, sr = librosa.load(audio_filepath, sr=SAMPLE_RATE, mono=True)
+        audio_trimmed, _ = librosa.effects.trim(audio, top_db=25)
+        mel_spec = librosa.feature.melspectrogram(
+            y=audio_trimmed, sr=SAMPLE_RATE, n_mels=N_MELS,
+            n_fft=N_FFT, hop_length=HOP_LENGTH
+        )
+        log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)
+        features = log_mel_spec.T
         
-        # 2. Trim Silence (Voice Activity Detection)
-        audio_trimmed, _ = librosa.effects.trim(audio, top_db=20)
-
-        # 3. Extract MFCCs
-        mfccs = librosa.feature.mfcc(y=audio_trimmed, sr=SAMPLE_RATE, n_mfcc=N_MFCC)
-        mfccs = mfccs.T # Transpose to (time, features)
-        
-        # 4. Pad or Truncate to the fixed length the model expects
-        if mfccs.shape[0] > MAX_LEN:
-            mfccs = mfccs[:MAX_LEN, :]
+        if features.shape[0] > MAX_LEN_FRAMES:
+            features = features[:MAX_LEN_FRAMES, :]
         else:
-            padding = np.zeros((MAX_LEN - mfccs.shape[0], N_MFCC))
-            mfccs = np.vstack((mfccs, padding))
+            padding = np.zeros((MAX_LEN_FRAMES - features.shape[0], N_MELS))
+            features = np.vstack((features, padding))
 
-        # 5. Add a "batch" dimension because the model expects it
-        mfccs = np.expand_dims(mfccs, axis=0)
-
-        # 6. Use our specialized embedding model to get the voiceprint
-        embedding = embedding_model.predict(mfccs)
+        features = np.expand_dims(features, axis=0)
         
-        # The output is a batch of 1, so we squeeze it to a simple 1D array
-        return embedding.flatten()
+        # This will now use the globally loaded model
+        embedding = embedding_model.predict(features, verbose=0)
+        
+        return embedding[0]
 
     except Exception as e:
         print(f"Error processing audio file {audio_filepath}: {e}")
-        return None
-
-
-def preprocess_single_audio_file(audio_filepath):
-    """
-    Takes a single audio file path and processes it into a single,
-    correctly shaped MFCC array for model input.
-    """
-    try:
-        # This logic is the same as in get_voice_embedding
-        audio, sr = librosa.load(audio_filepath, sr=SAMPLE_RATE, mono=True)
-        audio_trimmed, _ = librosa.effects.trim(audio, top_db=20)
-        mfccs = librosa.feature.mfcc(y=audio_trimmed, sr=SAMPLE_RATE, n_mfcc=N_MFCC)
-        mfccs = mfccs.T
-        if mfccs.shape[0] > MAX_LEN:
-            mfccs = mfccs[:MAX_LEN, :]
-        else:
-            padding = np.zeros((MAX_LEN - mfccs.shape[0], N_MFCC))
-            mfccs = np.vstack((mfccs, padding))
-        return mfccs
-    except Exception as e:
-        print(f"Error in preprocess_single_audio_file: {e}")
         return None

@@ -10,16 +10,21 @@ def show_home_screen(app, event=None):
     if app.currently_logged_in_user:
         # If a user is logged in, show their main screen
         show_logged_in_screen(app)
+        return
+
+    if app.just_enrolled:
+        app.just_enrolled = False
+        app.login_attempt_user = {"username": app.just_enrolled_username}
+        app.show_login_voice_auth_screen()
+        return
     else:
-        # If no user is logged in, show the initial screen to start the process
         show_insert_key_screen(app)
 
 def show_insert_key_screen(app):
     """A simple, modern welcome screen with a lighter card and no excessive space."""
-    # app.login_flow_state = 'not_started'
-    # app.currently_logged_in_user = None
-    # app.login_attempt_user = None
-
+    app.login_flow_state = 'not_started'
+    app.currently_logged_in_user = None
+    app.login_attempt_user = None
     LIGHT_CARD_BG = "#AD567C" 
 
     card = ui_helpers.create_main_card(app, width=450, height=350)

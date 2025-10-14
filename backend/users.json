@@ -62,7 +62,7 @@
     "shley": {
         "full_name": "Ashley Jewel Heart",
         "email": "charlottemissy435@gmail.com",
-        "password_hash": "b26a45e006b549e49e0a1afbaec961667af1e293fb409c2fb320d8b483d01f95",
+        "password_hash": "2fd1e4b7fabb56b28df3b6ea5acba1f1594f8361311de4893e8fa47c11a74952",
         "voiceprint_path": "voiceprints\\shley.npy"
     },
     "user 1": {
@@ -118,5 +118,35 @@
         "email": "asas",
         "password_hash": "b26a45e006b549e49e0a1afbaec961667af1e293fb409c2fb320d8b483d01f95",
         "voiceprint_path": "voiceprints\\user102.npy"
+    },
+    "anj1122": {
+        "full_name": "Angeline Caponpon",
+        "email": "caponponangeline003@gmail.com",
+        "password_hash": "a28005f9c9b9d8ece15e1b8734c0ec3ab043051e24b81b6d32758c96d08afbc8",
+        "voiceprint_path": "voiceprints\\anj1122.npy"
+    },
+    "angeline1212": {
+        "full_name": "Angeline Ulang",
+        "email": "caponponangeline003@gmail.com",
+        "password_hash": "e2ba56fcb0114f811dd002bd8a946990de4ac3f8bb2689d79c35626fc67ad3c2",
+        "voiceprint_path": "voiceprints\\angeline1212.npy"
+    },
+    "anj2323": {
+        "full_name": "Angeline Caponpon",
+        "email": "caponponangeline003@gmail.com",
+        "password_hash": "45f7573ab1b042035104e831eff6f9181ec6fd830987a25bae098b2dbb3fcb41",
+        "voiceprint_path": "voiceprints\\anj2323.npy"
+    },
+    "anjj1212": {
+        "full_name": "Angeline Ulang",
+        "email": "caponponangeline003@gmail.com",
+        "password_hash": "55ee4ffc28511963aaf63d986d5d3b843539690c04c16cdbe3042feee209b0eb",
+        "voiceprint_path": "voiceprints\\anjj1212.npy"
+    },
+    "anjjj1212": {
+        "full_name": "Angeline Cap",
+        "email": "caponponangeline003@gmail.com",
+        "password_hash": "55ee4ffc28511963aaf63d986d5d3b843539690c04c16cdbe3042feee209b0eb",
+        "voiceprint_path": "voiceprints\\anjjj1212.npy"
     }
 }
