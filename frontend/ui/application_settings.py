@@ -321,6 +321,7 @@ def show_password_screen_voice_entry1(app):
 # Step 2: Voice Enrollment (Frontend only)
 # -------------------------------
 def show_voice_enrollment_screen(app):
+    print("show_voice_enrollment_screen")
     """Voice enrollment screen (frontend only)."""
     LIGHT_CARD_BG = "#AD567C"
 
@@ -351,14 +352,15 @@ def show_voice_enrollment_screen(app):
     card.pack(pady=30)
     card.pack_propagate(False)
 
-    tk.Label(card, text="Voice Enrollment", font=font_title, fg="white", bg=LIGHT_CARD_BG).pack(pady=(20, 10))
+    tk.Label(card, text="Change Voice Enrollment", font=font_title, fg="white", bg=LIGHT_CARD_BG).pack(pady=(20, 10))
     tk.Label(card, text='Please read the phrase aloud:', font=font_text, fg="white", bg=LIGHT_CARD_BG).pack()
     tk.Label(card, text=f'"{phrase_to_read}"', font=font_text, fg="yellow", bg=LIGHT_CARD_BG, wraplength=450).pack(expand=True, pady=10)
 
     # Mic button
     mic_label = tk.Label(card, image=app.mic_img, bg=LIGHT_CARD_BG, highlightthickness=0, cursor="hand2")
     mic_label.pack(pady=10)
-    mic_label.bind("<Button-1>", lambda e: app.recording_status_label.config(text="Recording..."))
+    mic_label.bind("<Button-1>", lambda e: activate_mic(app))
+    # mic_label = tk.Label(card, image=app.mic_img, bg=LIGHT_CARD_BG, highlightthickness=0, cursor="hand2"); mic_label.pack(pady=10); mic_label.bind("<Button-1>", app.toggle_recording)
 
     # Status label
     app.recording_status_label = tk.Label(card, text="Click the mic to record", font=font_text, fg="white", bg=LIGHT_CARD_BG)
@@ -369,16 +371,36 @@ def show_voice_enrollment_screen(app):
     bf.pack(fill="x", padx=60, pady=(0, 10))
 
     tk.Button(bf, text="< Back", font=font_button, bg="#F5F5F5", fg="black",
-              relief="flat", padx=12, pady=4, command=lambda: show_otp_verification_screen(app)).pack(side="left")
+              relief="flat", padx=12, pady=4, command=lambda: show_applications_screen(app)).pack(side="left")
+    
 
     def complete_enrollment():
         messagebox.showinfo("Success", "Voice enrollment complete!")
         show_applications_screen(app)
 
-    tk.Button(bf, text="Next →", font=font_button, bg="#F5F5F5", fg="black",
-              relief="flat", padx=12, pady=4, command=complete_enrollment).pack(side="right")
+    # next_button = tk.Button(bf, text="Next →", font=font_button, bg="#F5F5F5", fg="black",
+    #           relief="flat", padx=12, pady=4, state = "disabled", command=complete_enrollment).pack(side="right")
+
+    next_button = tk.Button(
+        bf,
+        text="Next →",
+        font=font_button,
+        bg="#F5F5F5",
+        fg="black",
+        relief="flat",
+        padx=12,
+        pady=4,
+        state="disabled",  # initially disabled
+        command=complete_enrollment
+    )
+    next_button.pack(side="right")
 
 
+    def activate_mic(app):
+        print("1 2 3 4")
+        next_button.config(state="normal")
+
+    
 "--------------- CHANGE OTP Email Address ------------------------ "
 # ------ dating show_otp_settings_screen_step 2 and new name lang siya ------
 def show_change_otp_settings_screen(app):

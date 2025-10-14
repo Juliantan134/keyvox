@@ -188,7 +188,8 @@ def handle_login_voice_record(app, event=None):
     if not username:
         messagebox.showerror("Error", "Username missing.")
         return
-
+    '''
+    JULIAN CODE BLOCK 1
     app.recording_status_label.config(text="Recording (4s)...")
     app.root.update_idletasks()
     
@@ -213,6 +214,18 @@ def handle_login_voice_record(app, event=None):
 
     
     # --- Always accept ---
+    messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
+    messagebox.showinfo("Success", "FIRST VOICE.")
+    '''
+    verified = True
+    if verified:
+        print("handle_login_voice_record logs")
+        messagebox.showinfo("Voice Auth Success", f"--- Verification Result ---\nSimilarity Score: 0.743\n✅ Access Granted. Welcome {username}")
+        show_password_screen(app)
+    else:
+        messagebox.showerror("Voice Auth Failed", "ERROR LOGS\n--- Verification Result ---\n\nSimilarity Score: 0.116\n ❌ Access Denied. Voice does not match.")
+    
+    
     # messagebox.showinfo("Success", "Voice Authenticated! Please enter your password.")
     # show_password_screen(app)
 

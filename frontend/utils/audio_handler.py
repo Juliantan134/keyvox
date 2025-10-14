@@ -3,6 +3,7 @@ import wave
 import pyaudio
 import threading
 import frontend_config as config
+from tkinter import messagebox
 
 # PyAudio format constant
 FORMAT = pyaudio.paInt16
@@ -48,7 +49,9 @@ def toggle_recording(app, event=None):
         app.next_btn.config(state="disabled")
         app.recording_status_label.config(text="Recording... Click mic to stop.")
         app.recording_thread = threading.Thread(target=_record_audio_thread, args=(app,), daemon=True)
-        app.recording_thread.start()
+        app.recording_thread.start() 
+    print("toggle_recording")
+    messagebox.showinfo("TRIAL 1", "Trial 2 3 4 5 ")
 
 def _record_audio_thread(app):
     """The target function for the recording thread."""

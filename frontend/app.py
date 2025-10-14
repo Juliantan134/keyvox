@@ -61,11 +61,12 @@ class KeyVoxApp:
         self.recording_thread = None
         self.current_phrase_index = 0
         self.enrollment_phrases = [
-            "My password is my voice", 
-            "Authenticate me through speech", 
-            "Nine five two seven echo zebra tree", 
-            "Today I confirm my identity using my voice", 
-            "Unlocking access with my voice"
+            "My password is my voice"
+            # , 
+            # "Authenticate me through speech", 
+            # "Nine five two seven echo zebra tree", 
+            # "Today I confirm my identity using my voice", 
+            # "Unlocking access with my voice"
         ]
         self.token_id = "f3d4-9a7b-23ce-8e6f"
         self.just_enrolled = False

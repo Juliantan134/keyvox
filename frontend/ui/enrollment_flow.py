@@ -150,6 +150,7 @@ def show_enrollment_step2(app):
     tk.Button(bf, text="Start →", font=font_button, bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR, relief="flat", padx=12, pady=4, command=lambda: show_enrollment_voice_record(app)).pack(side="right")
 
 def show_enrollment_voice_record(app):
+    print("show_enrollment_voice_record")
     LIGHT_CARD_BG = "#AD567C"
     for widget in app.content_frame.winfo_children(): widget.destroy()
     app.enrollment_state = 'step3_voice_record'
@@ -167,7 +168,10 @@ def show_enrollment_voice_record(app):
     # Corrected command with lambda
     tk.Button(bf, text="< Back", font=font_button, bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR, relief="flat", padx=12, pady=4, command=lambda: go_back_phrase(app)).pack(side="left")
     
-    app.next_btn = tk.Button(bf, text="Next →", font=font_button, bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR, relief="flat", padx=12, pady=4, command=lambda: go_next_phrase(app), state="disabled"); app.next_btn.pack(side="right")
+    # app.next_btn = tk.Button(bf, text="Next →", font=font_button, bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR, relief="flat", padx=12, pady=4, command=lambda: go_next_phrase(app), state="disabled"); app.next_btn.pack(side="right")
+    app.next_btn = tk.Button(bf, text="Next →", font=font_button, bg=config.BUTTON_LIGHT_COLOR, fg=config.BUTTON_LIGHT_TEXT_COLOR, relief="flat", padx=12, pady=4, command=lambda: handle_final_enrollment_upload(app, next_step="otp"), state="disabled"); app.next_btn.pack(side="right")
+
+
 
 def go_back_phrase(app):
     if app.current_phrase_index > 0:
