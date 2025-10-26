@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from helpers import main_model, preprocess_single_audio_file # We will create this new function
+from helpers import embedding_model # We will create this new function
 
 def analyze_lstm_gates(audio_filepath):
     """

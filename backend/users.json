@@ -148,5 +148,11 @@
         "email": "caponponangeline003@gmail.com",
         "password_hash": "55ee4ffc28511963aaf63d986d5d3b843539690c04c16cdbe3042feee209b0eb",
         "voiceprint_path": "voiceprints\\anjjj1212.npy"
+    },
+    "julszz": {
+        "full_name": "Julian Justin Tan",
+        "email": "tanlola560@gmail.com",
+        "password_hash": "e8c0cf017b2d041447ca630412f2406ddc9d590c30644abda4838f91a5b8c28e",
+        "voiceprint_path": "julszz.npy"
     }
 }

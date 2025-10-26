@@ -201,15 +201,22 @@ def handle_login_voice_record(app, event=None):
 
     response = app.api.verify_voice(username, filepath) # Use your actual voice verify method
 
-    if response and response.get("status") == "success":
-        # If the voice is correct, proceed to the password screen
-        messagebox.showinfo("Voice Verified", "Voice authentication successful. Please enter your password.")
-        show_password_screen(app)
+        # --- PROCESS THE RESPONSE ---
+        # ✅ CORRECTED CHECK: Look for 'verified' key and check if it's True
+    if response and response.get("verified") is True:
+            # Voice matched! Proceed to password screen
+            print(f"Voice verification SUCCESS for {username} via API.")
+            messagebox.showinfo("Voice Verified", "Voice authentication successful. Please enter your password.")
+            show_password_screen(app) # Navigate to next step
     else:
-        # If the voice fails, show an error and stay on this screen
-        error_message = response.get("message", "Voice not recognized. Please try again.")
-        messagebox.showerror("Authentication Failed", error_message)
-        app.recording_status_label.config(text="Click the mic to try again")
+            # Voice failed or API returned an error structure
+            print(f"Voice verification FAILED for {username} via API. Response: {response}")
+            error_message = "Voice not recognized. Please try again." # Default
+            if response and response.get("message"): # Use message from backend if available
+                error_message = response.get("message")
+            messagebox.showerror("Authentication Failed", error_message)
+            if hasattr(app, 'recording_status_label'):
+                 app.recording_status_label.config(text="Verification failed. Click mic again.")
 
     
     # --- Always accept ---
